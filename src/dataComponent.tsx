@@ -2,29 +2,62 @@
 import axios, { AxiosResponse } from "axios";
 import React, { Fragment, useEffect, useState } from "react";
 
-const TestComponent = (): JSX.Element => {
+const DataComponent = (): JSX.Element => {
   interface Idata {
     success: boolean;
     message: string;
     hostname: string;
     time: number;
+    name: string;
   }
 
   const [data, setData] = useState<Idata>();
   const [timer, setTime] = useState(0);
+  const url = "https://api.factoryfour.com/API_NAME/health/status";
+
+  const api_names: Array<string> = [
+    "accounts",
+    "assets",
+    "customers",
+    "datapoints",
+    "devices",
+    "documents",
+    "forms",
+    "invites",
+    "media",
+    "messages",
+    "namespaces",
+    "orders",
+    "patients",
+    "relationships",
+    "rules",
+    "templates",
+    "users",
+    "workfolows",
+  ];
+
+  const [apis_data, setApis_data] = useState<Idata[]>([]);
+  const initial_data: Idata[] = [];
+
+  const get = async () => {
+    return await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
 
   useEffect(() => {
-    const get = async () => {
-      const response = await axios.get(
-        "https://api.factoryfour.com/ACOUNTS/health/status",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setData(response.data);
-    };
+    api_names.forEach(async (name) => {
+      console.log(name);
+      const response = await get();
+      initial_data.push(response.data);
+
+      let hostNumber = response.data.hostname.split("-")[1];
+
+      console.log(name + "-" + hostNumber);
+      setApis_data([...initial_data]);
+    });
 
     setTimeout(() => {
       setTime(1);
@@ -34,24 +67,30 @@ const TestComponent = (): JSX.Element => {
       if (timer === 0) {
         setTime(1);
       }
-      get();
-      console.log(data);
-    }, 5000);
+      //setApis_data([]);
+    }, 15000);
   }, [timer]);
 
-  if (!data) {
+  if (!apis_data) {
     return <h1>loading...</h1>;
   } else
     return (
-      <div>
-        <h1>Hello</h1>{" "}
-        <div>
-          <h1>ACOUNTS</h1>
-          <h3> {data?.message.split(":")[0]}</h3>
-          <h3>{new Date(data!.time).toLocaleString().split(",")[1]}</h3>
-        </div>
+      <div className="dataContainer">
+        <ul>
+          *********************************
+          {apis_data.map((obj) => (
+            <div key={obj.time}>
+              <li>
+                {obj?.message.split(":")[0]}
+                {new Date(obj!.time).toLocaleString().split(",")[1]}
+                {obj.hostname}
+              </li>
+            </div>
+          ))}
+          *********************************
+        </ul>
       </div>
     );
 };
 
-export default TestComponent;
+export default DataComponent;

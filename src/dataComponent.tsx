@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios, { AxiosResponse } from "axios";
+import { hostname } from "os";
 import React, { Fragment, useEffect, useState } from "react";
 
 const DataComponent = (): JSX.Element => {
@@ -11,7 +12,6 @@ const DataComponent = (): JSX.Element => {
     name: string;
   }
 
-  const [data, setData] = useState<Idata>();
   const [timer, setTime] = useState(0);
   const url = "https://api.factoryfour.com/API_NAME/health/status";
 
@@ -37,7 +37,7 @@ const DataComponent = (): JSX.Element => {
   ];
 
   const [apis_data, setApis_data] = useState<Idata[]>([]);
-  const initial_data: Idata[] = [];
+  const initial_data: any = [];
 
   const get = async () => {
     return await axios.get(url, {
@@ -51,11 +51,17 @@ const DataComponent = (): JSX.Element => {
     api_names.forEach(async (name) => {
       console.log(name);
       const response = await get();
-      initial_data.push(response.data);
 
       let hostNumber = response.data.hostname.split("-")[1];
+      let newName = name + "-" + hostNumber;
 
-      console.log(name + "-" + hostNumber);
+      initial_data.push({
+        success: response.data.success,
+        message: response.data.message,
+        hostname: newName,
+        time: response.data.time,
+      });
+
       setApis_data([...initial_data]);
     });
 
@@ -67,7 +73,6 @@ const DataComponent = (): JSX.Element => {
       if (timer === 0) {
         setTime(1);
       }
-      //setApis_data([]);
     }, 15000);
   }, [timer]);
 

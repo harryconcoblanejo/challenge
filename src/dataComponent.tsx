@@ -1,69 +1,37 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import axios, { AxiosResponse } from "axios";
-import { hostname } from "os";
-import React, { Fragment, useEffect, useState } from "react";
+import axios from "axios";
 
-const DataComponent = (): JSX.Element => {
-  interface Idata {
-    success: boolean;
-    message: string;
-    hostname: string;
-    time: number;
-    name: string;
-  }
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
+interface Idata {
+  success: boolean;
+  message: string;
+  hostname: string;
+  time: number;
+}
+interface Iprops {
+  name: string;
+}
+const DataComponent = (props: Iprops): JSX.Element => {
   const [timer, setTime] = useState(0);
   const url = "https://api.factoryfour.com/API_NAME/health/status";
 
-  const api_names: Array<string> = [
-    "accounts",
-    "assets",
-    "customers",
-    "datapoints",
-    "devices",
-    "documents",
-    "forms",
-    "invites",
-    "media",
-    "messages",
-    "namespaces",
-    "orders",
-    "patients",
-    "relationships",
-    "rules",
-    "templates",
-    "users",
-    "workfolows",
-  ];
-
-  const [apis_data, setApis_data] = useState<Idata[]>([]);
-  const initial_data: any = [];
+  const [apis_data, setApis_data] = useState<Idata>();
 
   const get = async () => {
-    return await axios.get(url, {
+    const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/json",
       },
     });
+    console.log(response.data);
+    setApis_data(response.data);
   };
 
   useEffect(() => {
-    api_names.forEach(async (name) => {
-      console.log(name);
-      const response = await get();
-
-      let hostNumber = response.data.hostname.split("-")[1];
-      let newName = name + "-" + hostNumber;
-
-      initial_data.push({
-        success: response.data.success,
-        message: response.data.message,
-        hostname: newName,
-        time: response.data.time,
-      });
-
-      setApis_data([...initial_data]);
-    });
+    get();
+    //setting time
 
     setTimeout(() => {
       setTime(1);
@@ -77,23 +45,37 @@ const DataComponent = (): JSX.Element => {
   }, [timer]);
 
   if (!apis_data) {
-    return <h1>loading...</h1>;
+    return <h1>loading...</h1>; // loader
   } else
     return (
-      <div className="dataContainer">
-        <ul>
-          *********************************
-          {apis_data.map((obj) => (
-            <div key={obj.time}>
-              <li>
-                {obj?.message.split(":")[0]}
-                {new Date(obj!.time).toLocaleString().split(",")[1]}
-                {obj.hostname}
-              </li>
+      <div>
+        {apis_data.success === true ? (
+          <div>
+            <div className="title">
+              {props.name.split("-")[0].toUpperCase()}
             </div>
-          ))}
-          *********************************
-        </ul>
+            <div className="green_message">
+              {apis_data.message.split(":")[0]}
+            </div>
+            <div className="time">
+              {new Date(apis_data.time).toLocaleString().split(",")[1]}
+            </div>
+            <div className="hostName">
+              {" "}
+              {props.name} - {apis_data.hostname.split("-")[1]}
+            </div>
+          </div>
+        ) : (
+          /* if succes = false---> error card */
+          <div>
+            <div className="title">
+              {props.name.split("-")[0].toUpperCase()}
+            </div>
+            <div className="red_message">ERROR</div>
+            <div className="error_message">OUTAGE</div>
+            <div className="error_number">403 FORBIDEN</div>
+          </div>
+        )}
       </div>
     );
 };

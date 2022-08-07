@@ -25,7 +25,7 @@ const DataComponent = (props: Iprops): JSX.Element => {
         "Content-Type": "application/json",
       },
     });
-    console.log(response.data);
+
     setApis_data(response.data);
   };
 
@@ -49,6 +49,7 @@ const DataComponent = (props: Iprops): JSX.Element => {
   } else
     return (
       <div>
+        {/* if success = true ----> succes card!(green) */}
         {apis_data.success === true ? (
           <div>
             <div className="title">
@@ -66,7 +67,7 @@ const DataComponent = (props: Iprops): JSX.Element => {
             </div>
           </div>
         ) : (
-          /* if succes = false---> error card */
+          /* if succes = false---> error card (red) */
           <div>
             <div className="title">
               {props.name.split("-")[0].toUpperCase()}

@@ -15,7 +15,7 @@ interface Iprops {
 }
 const DataComponent = (props: Iprops): JSX.Element => {
   const [timer, setTime] = useState(0);
-  const url = "https://api.factoryfour.com/API_NAME/health/status";
+  const url = `https://api.factoryfour.com/${props.name}/health/status`;
 
   const [apis_data, setApis_data] = useState<Idata>();
 
@@ -25,7 +25,7 @@ const DataComponent = (props: Iprops): JSX.Element => {
         "Content-Type": "application/json",
       },
     });
-
+    console.log(response.data);
     setApis_data(response.data);
   };
 
@@ -45,39 +45,29 @@ const DataComponent = (props: Iprops): JSX.Element => {
   }, [timer]);
 
   if (!apis_data) {
-    return <h1>loading...</h1>; // loader
+    return (
+      <div>
+        <div className="title">{props.name.split("-")[0].toUpperCase()}</div>
+        <div className="red_message">ERROR</div>
+        <div className="error_message">OUTAGE</div>
+        <div className="error_number">403 FORBIDEN</div>
+      </div>
+    );
   } else
     return (
       <div>
-        {/* if success = true ----> succes card!(green) */}
-        {apis_data.success === true ? (
-          <div>
-            <div className="title">
-              {props.name.split("-")[0].toUpperCase()}
-            </div>
-            <div className="green_message">
-              {apis_data.message.split(":")[0]}
-            </div>
-            <div className="time">
-              {new Date(apis_data.time).toLocaleString().split(",")[1]}
-            </div>
-            <div className="hostName">
-              {" "}
-              {props.name} - {apis_data.hostname.split("-")[1]}
-            </div>
-          </div>
-        ) : (
-          /* if succes = false---> error card (red) */
-          <div>
-            <div className="title">
-              {props.name.split("-")[0].toUpperCase()}
-            </div>
-            <div className="red_message">ERROR</div>
-            <div className="error_message">OUTAGE</div>
-            <div className="error_number">403 FORBIDEN</div>
-          </div>
-        )}
+        <div className="title">{props.name.split("-")[0].toUpperCase()}</div>
+        <div className="green_message">{apis_data.message.split(":")[0]}</div>
+        <div className="time">
+          {new Date(apis_data.time).toLocaleString().split(",")[1]}
+        </div>
+        <div className="hostName">
+          {" "}
+          {props.name} - {apis_data.hostname.split("-")[1]}
+        </div>
       </div>
+
+      /* if succes = false---> error card (red) */
     );
 };
 
